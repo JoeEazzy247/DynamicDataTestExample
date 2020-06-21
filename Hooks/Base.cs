@@ -18,6 +18,10 @@ namespace ClassLibrary1.Hooks
     public  class Base
     {
         public static IWebDriver driver { get; set; }
+        public static ExtentReports extent = new ExtentReports();
+        public static ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(
+            @"C:\Users\joseph.ekeleme\source\repos\ClassLibrary1\report\repo.html");
+        
         /*private static ExtentTest FeatureName;
         private static ExtentTest Scenerio;
         private static ExtentReports extent;*/
@@ -73,6 +77,12 @@ namespace ClassLibrary1.Hooks
 
         }
 */
+
+        [BeforeFeature]
+        public static void setupReport()
+        {
+            extent.AttachReporter(htmlReporter);
+        }
         [BeforeScenario]
         public void BeforeScenario()
         {
@@ -86,6 +96,23 @@ namespace ClassLibrary1.Hooks
         {
             driver.Quit();
         
+        }
+        [AfterTestRun]
+        public static void flushReport()
+        {
+            extent.Flush();
+        }
+
+        public static string capture(IWebDriver driver, string screenshotname)
+        {
+            ITakesScreenshot ts = (ITakesScreenshot)driver;
+            Screenshot screenshot = ts.GetScreenshot();
+            string path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
+            string path2 = path.Substring(0, path.LastIndexOf("bin")) + "\\report\\Screenshot\\" + screenshotname + ".png";
+            string locapath = new Uri(path2).LocalPath;
+            screenshot.SaveAsFile(locapath, ScreenshotImageFormat.Png);
+            return locapath;
+
         }
     }
 }
